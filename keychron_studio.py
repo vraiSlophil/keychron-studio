@@ -318,7 +318,10 @@ class KeychronWindow(Adw.ApplicationWindow):
         return None
 
     def _on_key_pressed(self, _ctrl, keyval, keycode, _state):
-        if keyval == Gdk.KEY_ISO_Level3_Shift:
+        if keyval in (Gdk.KEY_Shift_L, Gdk.KEY_Shift_R):
+            self.mod_shift = True
+            self._refresh_keys()
+        elif keyval == Gdk.KEY_ISO_Level3_Shift:
             self.mod_altgr = True
             self._refresh_keys()
         rc = self._rc_for_hwkeycode(keycode)
@@ -327,7 +330,10 @@ class KeychronWindow(Adw.ApplicationWindow):
         return False  # let the entry still receive the keystroke
 
     def _on_key_released(self, _ctrl, keyval, keycode, _state):
-        if keyval == Gdk.KEY_ISO_Level3_Shift:
+        if keyval in (Gdk.KEY_Shift_L, Gdk.KEY_Shift_R):
+            self.mod_shift = False
+            self._refresh_keys()
+        elif keyval == Gdk.KEY_ISO_Level3_Shift:
             self.mod_altgr = False
             self._refresh_keys()
         rc = self._rc_for_hwkeycode(keycode)
@@ -336,7 +342,8 @@ class KeychronWindow(Adw.ApplicationWindow):
         return False
 
     def _on_mods(self, _ctrl, state):
-        self.mod_shift = bool(state & Gdk.ModifierType.SHIFT_MASK)
+        # CapsLock is a reliable lock in the mask; Shift/AltGr are tracked on their
+        # own key press/release events to avoid the modifier-state lag on release.
         self.mod_caps = bool(state & Gdk.ModifierType.LOCK_MASK)
         self._refresh_keys()
         return False
