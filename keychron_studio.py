@@ -6,7 +6,7 @@ Unofficial community project. Not affiliated with or endorsed by Keychron.
 import os, sys, json, time, gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio, GLib, Pango
+from gi.repository import Gtk, Adw, Gio, GLib, Gdk, Pango
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import kc_client, kc_layout, kc_keycodes, kc_scripts, kc_i18n, kc_keycaps, kc_evdev
@@ -69,10 +69,11 @@ class KeyboardView(Gtk.Fixed):
     def _clicked(self, btn, rc):
         self.on_key(rc, btn)
 
-    def show_layer(self, keymap, layer, caps):
+    def show_layer(self, keymap, layer, caps, mods):
+        shift, altgr, caps_lock = mods
         for rc, lbl in self.labels.items():
             code = keymap[layer][rc[0]][rc[1]]
-            lbl.set_text(kc_keycaps.legend(code, caps))
+            lbl.set_text(kc_keycaps.legend(code, caps, shift, altgr, caps_lock))
             self.buttons[rc].set_tooltip_text(f"{kc_keycodes.label(code)}  (0x{code:04X})")
 
 
@@ -110,9 +111,12 @@ class KeychronWindow(Adw.ApplicationWindow):
         self.toasts.set_child(root)
         self.set_content(self.toasts)
 
+        self.mod_shift = self.mod_altgr = self.mod_caps = False
         keyctrl = Gtk.EventControllerKey()
         keyctrl.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        keyctrl.connect("key-pressed", self._on_test_key)
+        keyctrl.connect("key-pressed", self._on_key_pressed)
+        keyctrl.connect("key-released", self._on_key_released)
+        keyctrl.connect("modifiers", self._on_mods)
         self.add_controller(keyctrl)
 
         self.build_stack()
@@ -282,7 +286,8 @@ class KeychronWindow(Adw.ApplicationWindow):
 
     def _refresh_keys(self):
         if self.keymap:
-            self.kbview.show_layer(self.keymap, self._cur_layer(), self.caps)
+            self.kbview.show_layer(self.keymap, self._cur_layer(), self.caps,
+                                   (self.mod_shift, self.mod_altgr, self.mod_caps))
 
     def _on_caps(self, dd, _p):
         self.caps_layout = self.caps_codes[dd.get_selected()]
@@ -301,29 +306,39 @@ class KeychronWindow(Adw.ApplicationWindow):
         layer = self._cur_layer()
         self.keymap[layer][rc[0]][rc[1]] = code
         self.pending[(layer, rc[0], rc[1])] = code
-        self.kbview.labels[rc].set_text(kc_keycaps.legend(code, self.caps))
+        self.kbview.labels[rc].set_text(
+            kc_keycaps.legend(code, self.caps, self.mod_shift, self.mod_altgr, self.mod_caps))
         self.kbview.buttons[rc].set_tooltip_text(f"{kc_keycodes.label(code)}  (0x{code:04X})")
         self.apply_btn.set_sensitive(True)
 
-    def _on_test_key(self, _ctrl, _keyval, keycode, _state):
-        rc = None
+    def _rc_for_hwkeycode(self, keycode):
         for hid in kc_evdev.hids_from_hwkeycode(keycode):
             if hid in self.hid2rc:
-                rc = self.hid2rc[hid]
-                break
+                return self.hid2rc[hid]
+        return None
+
+    def _on_key_pressed(self, _ctrl, keyval, keycode, _state):
+        if keyval == Gdk.KEY_ISO_Level3_Shift:
+            self.mod_altgr = True
+            self._refresh_keys()
+        rc = self._rc_for_hwkeycode(keycode)
         if rc:
-            self._flash(rc)
+            self.kbview.buttons[rc].add_css_class("pressed")
         return False  # let the entry still receive the keystroke
 
-    def _flash(self, rc):
-        btn = self.kbview.buttons.get(rc)
-        if not btn:
-            return
-        btn.add_css_class("pressed")
-        GLib.timeout_add(220, self._unflash, btn)
+    def _on_key_released(self, _ctrl, keyval, keycode, _state):
+        if keyval == Gdk.KEY_ISO_Level3_Shift:
+            self.mod_altgr = False
+            self._refresh_keys()
+        rc = self._rc_for_hwkeycode(keycode)
+        if rc:
+            self.kbview.buttons[rc].remove_css_class("pressed")
+        return False
 
-    def _unflash(self, btn):
-        btn.remove_css_class("pressed")
+    def _on_mods(self, _ctrl, state):
+        self.mod_shift = bool(state & Gdk.ModifierType.SHIFT_MASK)
+        self.mod_caps = bool(state & Gdk.ModifierType.LOCK_MASK)
+        self._refresh_keys()
         return False
 
     def _apply_pending(self, _btn):
@@ -420,8 +435,8 @@ class KeychronWindow(Adw.ApplicationWindow):
     def _install_css(self):
         css = Gtk.CssProvider()
         css.load_from_data(
-            b".kc-key{font-size:10px;padding:1px 2px;min-height:0;min-width:0;}"
-            b".kc-key.pressed{background-color:#3584e4;background-image:none;color:#ffffff;}")
+            b".kc-key{font-size:10px;padding:1px 2px;min-height:0;min-width:0;transition:none;}"
+            b".kc-key.pressed{background-color:#3584e4;background-image:none;color:#ffffff;transition:none;}")
         Gtk.StyleContext.add_provider_for_display(
             self.get_display(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
