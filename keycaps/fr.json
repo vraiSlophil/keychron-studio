@@ -1,26 +1,108 @@
 {
   "_name": "Français (AZERTY)",
-  "0x14": "A", "0x1A": "Z", "0x04": "Q", "0x1D": "W", "0x33": "M",
-  "0x35": { "base": "²" },
-  "0x1E": { "base": "&", "shift": "1" },
-  "0x1F": { "base": "é", "shift": "2", "altgr": "~" },
-  "0x20": { "base": "\"", "shift": "3", "altgr": "#" },
-  "0x21": { "base": "'", "shift": "4", "altgr": "{" },
-  "0x22": { "base": "(", "shift": "5", "altgr": "[" },
-  "0x23": { "base": "-", "shift": "6", "altgr": "|" },
-  "0x24": { "base": "è", "shift": "7", "altgr": "`" },
-  "0x25": { "base": "_", "shift": "8", "altgr": "\\" },
-  "0x26": { "base": "ç", "shift": "9", "altgr": "^" },
-  "0x27": { "base": "à", "shift": "0", "altgr": "@" },
-  "0x2D": { "base": ")", "shift": "°", "altgr": "]" },
-  "0x2E": { "base": "=", "shift": "+", "altgr": "}" },
-  "0x2F": { "base": "^", "shift": "¨" },
-  "0x30": { "base": "$", "shift": "£", "altgr": "¤" },
-  "0x32": { "base": "*", "shift": "µ" },
-  "0x34": { "base": "ù", "shift": "%" },
-  "0x10": { "base": ",", "shift": "?" },
-  "0x36": { "base": ";", "shift": "." },
-  "0x37": { "base": ":", "shift": "/" },
-  "0x38": { "base": "!", "shift": "§" },
-  "0x64": { "base": "<", "shift": ">", "altgr": "|" }
+  "0x14": "a",
+  "0x1A": "z",
+  "0x04": "q",
+  "0x1D": "w",
+  "0x33": "m",
+  "0x35": {
+    "base": "²"
+  },
+  "0x1E": {
+    "base": "&",
+    "shift": "1"
+  },
+  "0x1F": {
+    "base": "é",
+    "shift": "2",
+    "altgr": "~"
+  },
+  "0x20": {
+    "base": "\"",
+    "shift": "3",
+    "altgr": "#"
+  },
+  "0x21": {
+    "base": "'",
+    "shift": "4",
+    "altgr": "{"
+  },
+  "0x22": {
+    "base": "(",
+    "shift": "5",
+    "altgr": "["
+  },
+  "0x23": {
+    "base": "-",
+    "shift": "6",
+    "altgr": "|"
+  },
+  "0x24": {
+    "base": "è",
+    "shift": "7",
+    "altgr": "`"
+  },
+  "0x25": {
+    "base": "_",
+    "shift": "8",
+    "altgr": "\\"
+  },
+  "0x26": {
+    "base": "ç",
+    "shift": "9",
+    "altgr": "^"
+  },
+  "0x27": {
+    "base": "à",
+    "shift": "0",
+    "altgr": "@"
+  },
+  "0x2D": {
+    "base": ")",
+    "shift": "°",
+    "altgr": "]"
+  },
+  "0x2E": {
+    "base": "=",
+    "shift": "+",
+    "altgr": "}"
+  },
+  "0x2F": {
+    "base": "^",
+    "shift": "¨"
+  },
+  "0x30": {
+    "base": "$",
+    "shift": "£",
+    "altgr": "¤"
+  },
+  "0x32": {
+    "base": "*",
+    "shift": "µ"
+  },
+  "0x34": {
+    "base": "ù",
+    "shift": "%"
+  },
+  "0x10": {
+    "base": ",",
+    "shift": "?"
+  },
+  "0x36": {
+    "base": ";",
+    "shift": "."
+  },
+  "0x37": {
+    "base": ":",
+    "shift": "/"
+  },
+  "0x38": {
+    "base": "!",
+    "shift": "§"
+  },
+  "0x64": {
+    "base": "<",
+    "shift": ">",
+    "altgr": "|"
+  }
 }
