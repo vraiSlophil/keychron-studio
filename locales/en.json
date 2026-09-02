@@ -59,5 +59,11 @@
   "group.backlight": "Backlight",
   "group.layers": "Layers",
   "group.special": "Special",
-  "group.keychron": "Keychron"
+  "group.keychron": "Keychron",
+  "remap.caps": "Keycaps:",
+  "test.label": "Typing test",
+  "test.placeholder": "Type here to test (the key lights up)…",
+  "about.author": "Developed by Slophil / Nathan OUDER",
+  "about.website": "Website",
+  "about.github": "GitHub"
 }

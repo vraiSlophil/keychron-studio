@@ -2,10 +2,6 @@
 """
 Keychron Studio — configure a Keychron K5 v2 (VIA protocol) locally on Linux.
 Unofficial community project. Not affiliated with or endorsed by Keychron.
-
-GUI (GTK4 / libadwaita). All keyboard I/O is delegated to the privileged helper
-via kc_client (pkexec), keeping this process unprivileged. UI strings go through
-kc_i18n; the language follows the user's system locale (override in About).
 """
 import os, sys, json, time, gi
 gi.require_version("Gtk", "4.0")
@@ -13,7 +9,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, Gio, GLib, Pango
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import kc_client, kc_layout, kc_keycodes, kc_scripts, kc_i18n
+import kc_client, kc_layout, kc_keycodes, kc_scripts, kc_i18n, kc_keycaps, kc_evdev
 from kc_i18n import t
 
 APP_ID   = "com.github.vraislophil.keychron_studio"
@@ -23,6 +19,9 @@ SCALE = 46
 LAYER_CODES = ["layer.mac_base", "layer.mac_fn", "layer.win_base", "layer.win_fn"]
 SCRIPT_KEYS = [f"F{n}" for n in range(13, 25)]
 LANG_NAMES = {"en": "English", "fr": "Français"}
+AUTHOR_SITE = "https://nathan-ouder.fr/"
+AUTHOR_SITE_LINK = "https://nathan-ouder.fr/?utm_source=keychron_studio_about"
+AUTHOR_GH = "https://github.com/vraiSlophil"
 
 
 class KeycodePicker(Gtk.Popover):
@@ -51,7 +50,6 @@ class KeycodePicker(Gtk.Popover):
 
 
 class KeyboardView(Gtk.Fixed):
-    """Physical keyboard; each key is a button with an ellipsized label + tooltip."""
     def __init__(self, layout, on_key):
         super().__init__()
         self.on_key = on_key
@@ -71,21 +69,24 @@ class KeyboardView(Gtk.Fixed):
     def _clicked(self, btn, rc):
         self.on_key(rc, btn)
 
-    def show_layer(self, keymap, layer):
+    def show_layer(self, keymap, layer, caps):
         for rc, lbl in self.labels.items():
             code = keymap[layer][rc[0]][rc[1]]
-            text = kc_keycodes.label(code)
-            lbl.set_text(text)
-            self.buttons[rc].set_tooltip_text(f"{text}  (0x{code:04X})")
+            lbl.set_text(kc_keycaps.legend(code, caps))
+            self.buttons[rc].set_tooltip_text(f"{kc_keycodes.label(code)}  (0x{code:04X})")
 
 
 class KeychronWindow(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="Keychron Studio",
-                         default_width=1120, default_height=580)
+                         default_width=1120, default_height=640)
         self.layout = kc_layout.decode(DEF_PATH)
         self.keymap = None
         self.pending = {}
+        self.hid2rc = {}
+        self.caps_codes = kc_keycaps.available()
+        self.caps_layout = kc_i18n.current() if kc_i18n.current() in self.caps_codes else kc_keycaps.DEFAULT
+        self.caps = kc_keycaps.load(self.caps_layout)
 
         self._install_css()
         self.toasts = Adw.ToastOverlay()
@@ -95,7 +96,6 @@ class KeychronWindow(Adw.ApplicationWindow):
         self.switcher = Gtk.StackSwitcher(stack=self.stack)
         header.set_title_widget(self.switcher)
 
-        # language selector
         self.lang_codes = kc_i18n.available()
         self.lang_dd = Gtk.DropDown.new_from_strings(
             [LANG_NAMES.get(c, c.upper()) for c in self.lang_codes])
@@ -113,7 +113,6 @@ class KeychronWindow(Adw.ApplicationWindow):
         self.build_stack()
         GLib.idle_add(self.reload_keymap)
 
-    # ---------- stack (re)build ----------
     def build_stack(self):
         child = self.stack.get_first_child()
         while child is not None:
@@ -142,6 +141,13 @@ class KeychronWindow(Adw.ApplicationWindow):
         self.layer_dd = Gtk.DropDown.new_from_strings([t(c) for c in LAYER_CODES])
         self.layer_dd.connect("notify::selected", lambda *_: self._refresh_keys())
         bar.append(self.layer_dd)
+        bar.append(Gtk.Label(label=t("remap.caps")))
+        self.caps_dd = Gtk.DropDown.new_from_strings(
+            [kc_keycaps.display_name(c) for c in self.caps_codes])
+        if self.caps_layout in self.caps_codes:
+            self.caps_dd.set_selected(self.caps_codes.index(self.caps_layout))
+        self.caps_dd.connect("notify::selected", self._on_caps)
+        bar.append(self.caps_dd)
         self.apply_btn = Gtk.Button(label=t("remap.apply"), css_classes=["suggested-action"],
                                     sensitive=bool(self.pending))
         self.apply_btn.connect("clicked", self._apply_pending)
@@ -159,6 +165,16 @@ class KeychronWindow(Adw.ApplicationWindow):
         frame.set_size_request(int(22.4 * SCALE), int(6.3 * SCALE))
         page.append(frame)
         page.append(Gtk.Label(label=t("remap.hint"), css_classes=["dim-label"], xalign=0))
+
+        # typing test + live key highlight
+        test = Gtk.Box(spacing=10)
+        test.append(Gtk.Label(label=t("test.label")))
+        entry = Gtk.Entry(hexpand=True, placeholder_text=t("test.placeholder"))
+        ctrl = Gtk.EventControllerKey()
+        ctrl.connect("key-pressed", self._on_test_key)
+        entry.add_controller(ctrl)
+        test.append(entry)
+        page.append(test)
         return page
 
     def _backup_page(self):
@@ -222,10 +238,17 @@ class KeychronWindow(Adw.ApplicationWindow):
         return page
 
     def _about_page(self):
-        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10,
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8,
                        margin_top=24, margin_bottom=24, margin_start=24, margin_end=24)
         page.append(Gtk.Label(css_classes=["title-1"], label="Keychron Studio"))
         page.append(Gtk.Label(wrap=True, justify=Gtk.Justification.CENTER, label=t("about.subtitle")))
+        page.append(Gtk.Label(css_classes=["heading"], label=t("about.author")))
+        links = Gtk.Box(spacing=18, halign=Gtk.Align.CENTER)
+        links.append(Gtk.Label(use_markup=True,
+                     label=f'{t("about.website")} : <a href="{AUTHOR_SITE_LINK}">{AUTHOR_SITE}</a>'))
+        links.append(Gtk.Label(use_markup=True,
+                     label=f'{t("about.github")} : <a href="{AUTHOR_GH}">github.com/vraiSlophil</a>'))
+        page.append(links)
         page.append(Gtk.Label(css_classes=["dim-label"], label=t("about.license")))
         return page
 
@@ -240,15 +263,29 @@ class KeychronWindow(Adw.ApplicationWindow):
             self.keymap = res[0]["keymap"]
             self.pending.clear()
             self.apply_btn.set_sensitive(False)
+            self._rebuild_hid_index()
             self._refresh_keys()
             self._toast(t("toast.kb_read"))
         except kc_client.HelperError as e:
             self._toast(t("toast.error", e=e))
         return False
 
+    def _rebuild_hid_index(self):
+        self.hid2rc = {}
+        order = [i for i in (0, 2, 1, 3) if i < len(self.keymap)]
+        for L in order:
+            for r, row in enumerate(self.keymap[L]):
+                for c, code in enumerate(row):
+                    self.hid2rc.setdefault(code, (r, c))
+
     def _refresh_keys(self):
         if self.keymap:
-            self.kbview.show_layer(self.keymap, self._cur_layer())
+            self.kbview.show_layer(self.keymap, self._cur_layer(), self.caps)
+
+    def _on_caps(self, dd, _p):
+        self.caps_layout = self.caps_codes[dd.get_selected()]
+        self.caps = kc_keycaps.load(self.caps_layout)
+        self._refresh_keys()
 
     def _on_key(self, rc, btn):
         if self.keymap is None:
@@ -262,13 +299,27 @@ class KeychronWindow(Adw.ApplicationWindow):
         layer = self._cur_layer()
         self.keymap[layer][rc[0]][rc[1]] = code
         self.pending[(layer, rc[0], rc[1])] = code
-        text = kc_keycodes.label(code)
-        self.labels_set(rc, text, code)
+        self.kbview.labels[rc].set_text(kc_keycaps.legend(code, self.caps))
+        self.kbview.buttons[rc].set_tooltip_text(f"{kc_keycodes.label(code)}  (0x{code:04X})")
         self.apply_btn.set_sensitive(True)
 
-    def labels_set(self, rc, text, code):
-        self.kbview.labels[rc].set_text(text)
-        self.kbview.buttons[rc].set_tooltip_text(f"{text}  (0x{code:04X})")
+    def _on_test_key(self, _ctrl, _keyval, keycode, _state):
+        hid = kc_evdev.hid_from_hwkeycode(keycode)
+        rc = self.hid2rc.get(hid) if hid is not None else None
+        if rc:
+            self._flash(rc)
+        return False  # let the entry still receive the keystroke
+
+    def _flash(self, rc):
+        btn = self.kbview.buttons.get(rc)
+        if not btn:
+            return
+        btn.add_css_class("pressed")
+        GLib.timeout_add(220, self._unflash, btn)
+
+    def _unflash(self, btn):
+        btn.remove_css_class("pressed")
+        return False
 
     def _apply_pending(self, _btn):
         if not self.pending:
@@ -363,7 +414,9 @@ class KeychronWindow(Adw.ApplicationWindow):
 
     def _install_css(self):
         css = Gtk.CssProvider()
-        css.load_from_data(b".kc-key{font-size:10px;padding:1px 2px;min-height:0;min-width:0;}")
+        css.load_from_data(
+            b".kc-key{font-size:10px;padding:1px 2px;min-height:0;min-width:0;}"
+            b".kc-key.pressed{background-color:@accent_bg_color;color:@accent_fg_color;}")
         Gtk.StyleContext.add_provider_for_display(
             self.get_display(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 

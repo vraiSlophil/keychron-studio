@@ -59,5 +59,11 @@
   "group.backlight": "Rétroéclairage",
   "group.layers": "Couches",
   "group.special": "Spéciales",
-  "group.keychron": "Keychron"
+  "group.keychron": "Keychron",
+  "remap.caps": "Légendes :",
+  "test.label": "Test de frappe",
+  "test.placeholder": "Tape ici pour tester (la touche s’allume)…",
+  "about.author": "Développé par Slophil / Nathan OUDER",
+  "about.website": "Site web",
+  "about.github": "GitHub"
 }

@@ -61,6 +61,10 @@ dash or copy the generated `.desktop` file to `~/Desktop`.
   backlight, and Keychron custom keycodes: Bluetooth hosts, Mission Control, …).
 - **Backup / restore** the full keymap + macros to a local file.
 - **Reset** the keymap to firmware defaults.
+- **National keycaps**: switch the on-screen legends (US, French AZERTY, …) to match
+  your physical keycaps; add a layout by dropping a JSON file in `keycaps/`.
+- **Typing test**: a field below the keyboard highlights the physical key you press,
+  layout-independently (via evdev→HID), handy to locate keys on non-US boards.
 - **Scripts**: bind F13–F24 (the K5's four top-right keys are F13–F16 by default) to a
   shell command via a GNOME shortcut; mark a command *privileged* to run it through
   `pkexec`.
@@ -79,6 +83,9 @@ dash or copy the generated `.desktop` file to `~/Desktop`.
 - Open **VIA**/**QMK** raw-HID protocol (`the-via`, `qmk`).
 - Keyboard definition & keycode values from Keychron's QMK firmware
   (`Keychron/qmk_firmware`, branch `wls_2025q1`).
+
+## Author
+Built by **Slophil / Nathan OUDER** — <https://nathan-ouder.fr/> · <https://github.com/vraiSlophil>
 
 ## License
 [PolyForm Noncommercial 1.0.0](LICENSE) — personal and other **noncommercial** use and
