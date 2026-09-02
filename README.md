@@ -61,17 +61,21 @@ dash or copy the generated `.desktop` file to `~/Desktop`.
   backlight, and Keychron custom keycodes: Bluetooth hosts, Mission Control, …).
 - **Backup / restore** the full keymap + macros to a local file.
 - **Reset** the keymap to firmware defaults.
-- **National keycaps**: switch the on-screen legends (US, French AZERTY, …) to match
-  your physical keycaps; add a layout by dropping a JSON file in `keycaps/`.
-- **Typing test**: a field below the keyboard highlights the physical key you press,
-  layout-independently (via evdev→HID), handy to locate keys on non-US boards.
+- **National keycaps with modifier levels**: switch the on-screen legends (US, French
+  OSS, …) to match your physical keycaps, and hold Shift / CapsLock / AltGr to see each
+  key's other characters. French (OSS) legends are generated from the X11 xkb definition
+  (`tools/gen_keycaps_from_xkb.py`); add a layout by dropping a JSON in `keycaps/`.
+- **Typing test**: a field below the keyboard highlights the physical key you press
+  (held while pressed), layout-independently (via evdev→HID), handy to locate keys.
+- **Layer keys** (`MO`/`TO`) in the palette, and an **English/French UI** that follows
+  your system locale (`locales/`).
 - **Scripts**: bind F13–F24 (the K5's four top-right keys are F13–F16 by default) to a
   shell command via a GNOME shortcut; mark a command *privileged* to run it through
   `pkexec`.
 
-## Roadmap (v2)
-- Macro editor (16 slots), white-backlight brightness/effect sliders, layer keys
-  (`MO`/`TO`), additional layouts/variants, English UI (i18n).
+## Roadmap
+- Macro editor (16 slots), white-backlight brightness/effect sliders, more national
+  keycap layouts and additional Keychron boards.
 
 ## Troubleshooting
 - **"VIA interface not found"**: connect by cable, set the switch to Cable (not Bluetooth),
@@ -88,6 +92,6 @@ dash or copy the generated `.desktop` file to `~/Desktop`.
 Built by **Slophil / Nathan OUDER** — <https://nathan-ouder.fr/> · <https://github.com/vraiSlophil>
 
 ## License
-[PolyForm Noncommercial 1.0.0](LICENSE) — personal and other **noncommercial** use and
+[PolyForm Noncommercial 1.0.0](LICENSE.md) — personal and other **noncommercial** use and
 modification permitted; **commercial use is prohibited**. See
 [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
