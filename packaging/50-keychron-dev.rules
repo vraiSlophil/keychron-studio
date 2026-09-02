@@ -1,0 +1,6 @@
+# DEVELOPMENT ONLY — grants the logged-in user direct access to the Keychron
+# raw-HID node (skips pkexec). This WEAKENS the privilege-separation model and
+# also re-enables the Keychron web launcher. Install only if you understand the
+# trade-off:  sudo cp packaging/50-keychron-dev.rules /etc/udev/rules.d/ && \
+#             sudo udevadm control --reload-rules && sudo udevadm trigger
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", MODE="0660", GROUP="plugdev", TAG+="uaccess"

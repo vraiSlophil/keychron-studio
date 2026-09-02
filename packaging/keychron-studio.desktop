@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Keychron Studio
+GenericName=Keyboard Configurator
+Comment=Configure your Keychron K5 v2 keyboard (remap, macros, scripts)
+Exec=python3 __APPDIR__/keychron_studio.py
+Icon=keychron-studio
+Terminal=false
+Categories=Utility;Settings;HardwareSettings;
+Keywords=keyboard;keychron;via;qmk;remap;
+StartupNotify=true

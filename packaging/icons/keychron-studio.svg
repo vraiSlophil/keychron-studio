@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b4252"/>
+      <stop offset="1" stop-color="#2e3440"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="34" width="108" height="60" rx="12" fill="url(#body)"
+        stroke="#4c566a" stroke-width="2"/>
+  <g fill="#d8dee9">
+    <rect x="22" y="46" width="12" height="12" rx="2.5"/>
+    <rect x="38" y="46" width="12" height="12" rx="2.5"/>
+    <rect x="54" y="46" width="12" height="12" rx="2.5"/>
+    <rect x="70" y="46" width="12" height="12" rx="2.5"/>
+    <rect x="86" y="46" width="20" height="12" rx="2.5"/>
+    <rect x="22" y="64" width="20" height="12" rx="2.5"/>
+    <rect x="46" y="64" width="12" height="12" rx="2.5"/>
+    <rect x="62" y="64" width="12" height="12" rx="2.5"/>
+    <rect x="78" y="64" width="12" height="12" rx="2.5"/>
+    <rect x="94" y="64" width="12" height="12" rx="2.5"/>
+  </g>
+  <!-- accent key (customisation) -->
+  <rect x="46" y="80" width="36" height="10" rx="2.5" fill="#88c0d0"/>
+</svg>
