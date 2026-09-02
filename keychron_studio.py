@@ -110,6 +110,11 @@ class KeychronWindow(Adw.ApplicationWindow):
         self.toasts.set_child(root)
         self.set_content(self.toasts)
 
+        keyctrl = Gtk.EventControllerKey()
+        keyctrl.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        keyctrl.connect("key-pressed", self._on_test_key)
+        self.add_controller(keyctrl)
+
         self.build_stack()
         GLib.idle_add(self.reload_keymap)
 
@@ -170,9 +175,6 @@ class KeychronWindow(Adw.ApplicationWindow):
         test = Gtk.Box(spacing=10)
         test.append(Gtk.Label(label=t("test.label")))
         entry = Gtk.Entry(hexpand=True, placeholder_text=t("test.placeholder"))
-        ctrl = Gtk.EventControllerKey()
-        ctrl.connect("key-pressed", self._on_test_key)
-        entry.add_controller(ctrl)
         test.append(entry)
         page.append(test)
         return page
@@ -416,7 +418,7 @@ class KeychronWindow(Adw.ApplicationWindow):
         css = Gtk.CssProvider()
         css.load_from_data(
             b".kc-key{font-size:10px;padding:1px 2px;min-height:0;min-width:0;}"
-            b".kc-key.pressed{background-color:@accent_bg_color;color:@accent_fg_color;}")
+            b".kc-key.pressed{background-color:#3584e4;background-image:none;color:#ffffff;}")
         Gtk.StyleContext.add_provider_for_display(
             self.get_display(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
