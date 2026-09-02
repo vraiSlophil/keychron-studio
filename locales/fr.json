@@ -35,7 +35,7 @@
   "toast.error": "Erreur : {e}",
   "toast.keys_written": "{n} touche(s) écrite(s).",
   "toast.restored": "Restauré.",
-  "scripts.intro": "Assigne d’abord une touche physique à F13–F24 dans l’onglet Remap, puis associe ici une commande. « Privilégié » l’exécute via pkexec (mot de passe).",
+  "scripts.intro": "Assigne d’abord une touche physique à F13–F24 dans l’onglet Remap, puis associe ici une commande. « Privilégié » l’exécute en root via pkexec (mot de passe) — à réserver aux actions système. Une commande liée à ta session (notification, fenêtre, ex. notify-send) doit rester NON privilégiée.",
   "scripts.group": "Touches-scripts (via raccourcis GNOME)",
   "scripts.cmd_ph": "commande shell…",
   "scripts.priv_tip": "Privilégié (pkexec)",

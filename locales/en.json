@@ -35,7 +35,7 @@
   "toast.error": "Error: {e}",
   "toast.keys_written": "{n} key(s) written.",
   "toast.restored": "Restored.",
-  "scripts.intro": "First assign a physical key to F13–F24 in the Remap tab, then bind a command here. “Privileged” runs it via pkexec (password).",
+  "scripts.intro": "First assign a physical key to F13–F24 in the Remap tab, then bind a command here. “Privileged” runs it as root via pkexec (password) — use it only for system actions. A command tied to your session (a notification or window, e.g. notify-send) must stay NON-privileged.",
   "scripts.group": "Script keys (via GNOME shortcuts)",
   "scripts.cmd_ph": "shell command…",
   "scripts.priv_tip": "Privileged (pkexec)",
