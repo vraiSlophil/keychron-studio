@@ -1,0 +1,43 @@
+# Contributing to Keychron Studio
+
+Thanks for your interest! This project is community-run and **noncommercial**.
+Contributions are welcome under the rules below.
+
+## Licensing of contributions
+By submitting a contribution (code, docs, definitions), you agree that it is licensed
+under the project's [PolyForm Noncommercial 1.0.0](LICENSE) license. In short:
+- Personal and other **noncommercial** use and modification are allowed.
+- **Any commercial use, sale, or paid redistribution is prohibited** — for the project
+  as a whole and for your contribution.
+- You confirm you have the right to contribute the material.
+
+## Ground rules
+1. **Conventional Commits, in English.** Examples:
+   - `feat(remap): add layer-key (MO/TO) keycodes`
+   - `fix(helper): bounds-check macro buffer length`
+   - `docs(readme): clarify wired-mode requirement`
+   Allowed types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`, `perf`.
+2. **No new runtime dependencies** without discussion. The app deliberately relies only
+   on the Python standard library and the system GTK4/libadwaita bindings.
+3. **Keep the privileged helper minimal and auditable.** `kc_helper.py` runs as root:
+   - only add ops to the whitelist with explicit bounds checks;
+   - never take a filesystem path, shell string, or network target from its input;
+   - no `eval`, no `subprocess`, no sockets.
+4. **Do not guess keycode values.** Take them from the board's QMK firmware source and
+   note where they come from.
+5. Match the existing style (PEP 8, French UI strings, English code/comments).
+
+## Adding a keyboard / variant
+Place its VIA definition JSON in `defs/` (matrix + `layouts.keymap` + `customKeycodes`)
+and load it via `kc_layout`/`kc_keycodes`. Verify the `productId` matches the device.
+
+## Pull requests
+1. Fork, branch from `main` (`feat/…`, `fix/…`).
+2. Keep PRs focused; describe what you changed and how you tested it on real hardware.
+3. Ensure `python3 -c "import ast, pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.').glob('*.py')]"`
+   passes and the app still launches.
+
+## Reporting issues
+Include: keyboard model + `productId`, distro, desktop/session (X11/Wayland), and the
+exact error text. For the "VIA interface not found" case, confirm the keyboard is wired
+and set to Cable mode.
