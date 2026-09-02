@@ -103,6 +103,7 @@
   "0x64": {
     "base": "<",
     "shift": ">",
-    "altgr": "|"
+    "altgr": "≤",
+    "shift_altgr": "≥"
   }
 }
