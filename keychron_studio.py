@@ -306,8 +306,11 @@ class KeychronWindow(Adw.ApplicationWindow):
         self.apply_btn.set_sensitive(True)
 
     def _on_test_key(self, _ctrl, _keyval, keycode, _state):
-        hid = kc_evdev.hid_from_hwkeycode(keycode)
-        rc = self.hid2rc.get(hid) if hid is not None else None
+        rc = None
+        for hid in kc_evdev.hids_from_hwkeycode(keycode):
+            if hid in self.hid2rc:
+                rc = self.hid2rc[hid]
+                break
         if rc:
             self._flash(rc)
         return False  # let the entry still receive the keystroke
